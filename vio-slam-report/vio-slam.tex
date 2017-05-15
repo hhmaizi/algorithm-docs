@@ -19,6 +19,7 @@
 \usepackage{graphicx}
 % 设置页边距
 %\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{hyperref}
 
 \usepackage{listings}
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -286,6 +287,83 @@ p(t+\Delta t) = p(t) + v(t)\Delta t + + \frac{1}{2}g\Delta t^2
 
 \subsection{IMU pre-integration}
 
+\paragraph{IMU integration for all $\Delta t$ between two consecutive frames at times i and j}
+\begin{subequations}
+\begin{align}
+	R_j &= R_i \prod_{k=i}^{j-1} Exp((\tilde{\omega} - b^g_k - \eta^{gd}_k) \Delta t) \\
+	v_j &= v_i + g\Delta_{ij} + \Sigma_{k=i}^{j-1} R_k(\tilde{a}_k - b_k^a - \eta_k^{ad}) \Delta t \\
+	p_j &= p_i + \Sigma_{k=i}^{j-1}[v_k\Delta + \frac{1}{2}g \Delta t^2 +
+	\frac{1}{2} R^k (\tilde{a}_k - b_k^a - \eta_k^{ad}) \Delta t^2]
+\end{align}
+\end{subequations}
+
+\paragraph{relative motion increments}
+\begin{subequations}
+	\begin{align}
+	\Delta R_{ij} & \doteq R_i^T R_j = \prod_{k=i}^{j-1} Exp((\tilde{\omega} - b^g_k - \eta^{gd}_k) \Delta t) \\
+	\Delta v_{ij} &\doteq R_i^T(v_j - v_i -g \Delta t_{ij}) = \Sigma_{k=i}^{j-1} \Delta R_{ik}(\tilde{a}_k - b_k^a -\eta_k^{ad}) \Delta t\\
+	\Delta p_{ij} &\doteq R_i^T (p_j - p_i - v_i\Delta t_{ij} - \frac{1}{2} \Sigma_{k=i}^{j-1}g\Delta t^2)= 
+	\Sigma_{k=i}^{j-1}[\Delta v_{ik}\Delta t + \frac{1}{2}\Delta R_{ik}(\tilde{a}_k - b_k^a -\eta_k^{ad}) \Delta t^2]
+	\end{align}
+\end{subequations}
+
+\subsubsection{Preintegrated IMU Measurements}
+\begin{subequations}
+	\begin{align}
+	\Delta R_{ij} &\simeq \prod_{k=i}^{j-1}[Exp((\tilde{\omega}_k - b_i^g) \Delta t) 
+	Exp(-J_r^k \eta_k^{gd}\Delta t)]\\
+	&= \Delta \tilde{R}_{ij} \prod_{k=i}^{j-1}Exp(-\Delta \tilde{R}_{k+1j}^{T} J_r^k \eta_k^{gd} \Delta t)\\
+	&\doteq \Delta \tilde{R}_{ij} Exp(-\Delta \phi_{ij})
+	\end{align}
+\end{subequations}
+... 类似可得到 $\Delta v_{ij}$ 和 $\Delta p_{ij}$.\\
+接下来就是 “preintegrated measurement model”。
+\begin{subequations}
+	\begin{align}
+		\Delta \tilde{R}_{ij} &= R_i^T R_j Exp(\delta \phi_{ij}) \\
+		\Delta \tilde{v}_{ij} &= R_i^T(v_j - v_i -g \Delta t_{ij}) + \delta v_{ij}\\
+		\Delta p_{ij}         &= R_i^T (p_j - p_i - v_i\Delta t_{ij} - \frac{1}{2} g\Delta t_{ij}^2) + \delta p_{ij}
+	\end{align}
+\end{subequations}
+
+\subsubsection{Noise Propagation}
+最终可以证明$\phi_{ij})$， $\delta v_{ij}$ 和 $\delta p_{ij}$ 是 $\eta_k^{gd}$ 的线性函数，服从高斯分布。
+
+\subsubsection{Incorporating Bias Updates, given a bias update: $b \leftarrow \bar{b} + \delta b$}
+\begin{subequations}
+	\begin{align}
+	\Delta \tilde{R}_{ij}(b_i^g)  &\simeq \Delta \tilde{R}_{ij}(\bar{b}^g) 
+	Exp(\frac{\partial \Delta \bar{R}_{ij}}{\partial b^g} \delta b_i^g)\\
+	\Delta \tilde{v}_{ij}(b_i^g, b_i^a) &\simeq \Delta \tilde{v}_{ij}(\bar{b}_i^g, \bar{b}_i^a) + 
+	\frac{\partial \Delta \bar{v}_{ij}}{\partial b^g} \delta b_i^g + 
+	\frac{\partial \Delta \bar{v}_{ij}}{\partial b^a} \delta b_i^a\\
+	 \Delta \tilde{p}_{ij}(b_i^g, b_i^a) &\simeq \Delta \tilde{p}_{ij}(\bar{b}_i^g, \bar{b}_i^a) +
+	 	\frac{\partial \Delta \bar{p}_{ij}}{\partial b_i^g} \delta b_i^g + 
+	 \frac{\partial \Delta \bar{p}_{ij}}{\partial b^a} \delta b_i^a\\
+	\end{align}	
+\end{subequations}
+
+\subsubsection{Bias Model}
+Bias are slowly time-varying quantities, Hence model them with a "Browian Motion".
+For more info, see \href{http://www.cnblogs.com/youzx/p/6291327.html?utm_source=itdadao&utm_medium=referral}{IMU Model}
+\begin{equation}
+\dot{b}^g(t) = \eta^{bg}, \quad \dot{b}^a(t) = \eta{ba}
+\end{equation}
+
+the discrete form.
+\begin{equation}
+b^g_j= b^g_i + \eta^{bgd}, \quad b^a_j= b^a_i + \eta^{bad},
+\end{equation}
+
+covariance of discrete bias.
+\begin{equation}
+\Sigma^{bgd} \doteq \Delta t_{ij} Cov(\eta^{bg}), \quad \Sigma^{bad} \doteq \Delta t_{ij} Cov(\eta^{ba}),
+\end{equation}
+
+factor graph of bias model.
+\begin{equation}
+||r_{b_{ij}} ||^2 \doteq ||b_j^g - b_i^g||_{\Sigma^{bgd}}^2 + ||b_j^a - b_i^a||_{\Sigma^{bad}}^2
+\end{equation}
 
 \subsection{Linearizing expression for nonlinear optimization}
 \paragraph{linearizing rotation matrix}
