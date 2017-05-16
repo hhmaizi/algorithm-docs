@@ -7,7 +7,7 @@
 \BOOKMARK [3][-]{subsubsection.3.2.2}{initial\040state\040for\040marginalization}{subsection.3.2}% 7
 \BOOKMARK [3][-]{subsubsection.3.2.3}{marginalization\040non\040key\040frame}{subsection.3.2}% 8
 \BOOKMARK [3][-]{subsubsection.3.2.4}{marginalization\040key\040frame}{subsection.3.2}% 9
-\BOOKMARK [1][-]{section.4}{visual inertial slam 中的数学模型}{}% 10
+\BOOKMARK [1][-]{section.4}{math\040models\040from\040visual\040inertial\040slam}{}% 10
 \BOOKMARK [2][-]{subsection.4.1}{Notations}{section.4}% 11
 \BOOKMARK [2][-]{subsection.4.2}{Preliminaries}{section.4}% 12
 \BOOKMARK [2][-]{subsection.4.3}{MAP}{section.4}% 13
@@ -27,3 +27,5 @@
 \BOOKMARK [2][-]{subsection.6.2}{IMU的工作原理与机制}{section.6}% 27
 \BOOKMARK [2][-]{subsection.6.3}{gtsam 与isam}{section.6}% 28
 \BOOKMARK [2][-]{subsection.6.4}{matrix\040calculus}{section.6}% 29
+\BOOKMARK [2][-]{subsection.6.5}{manifold\040and\040linearization}{section.6}% 30
+\BOOKMARK [1][-]{section.7}{reference}{}% 31

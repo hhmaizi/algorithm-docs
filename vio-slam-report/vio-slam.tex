@@ -9,6 +9,8 @@
 \usepackage{polyglossia}
 \usepackage{indentfirst}             % 段首缩进
 
+\usepackage{pdfpages}
+
 \setdefaultlanguage{english}
 % 设置字体
 \setsansfont{Calibri}
@@ -210,7 +212,7 @@ okvis 的图优化模型：
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% visual inertial slam 中的数学模型
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{visual inertial slam 中的数学模型}
+\section{math models from visual inertial slam}
 \subsection{Notations}
 this is todo work.
 \subsection{Preliminaries}
@@ -312,12 +314,14 @@ the measurements:
 
 factor graphs and map estimation:
 the psoterior probability of the variables $\mathcal{X}_k$ :
-\begin{equation}
-p(\mathcal{X}_k|\mathcal{Z}_k) \varpropto p(\mathcal{X}_0) p(\mathcal{Z}_k | \mathcal{X}_k)
-=  p(\mathcal{X}_0) \prod_{(i,j)\in \mathcal{K}_k} p(\mathcal{C}_i, \mathcal{I}_{ij}|\mathcal{X}_k)
-=  p(\mathcal{X}_0) \prod_{(i,j)\in \mathcal{K}_k} p(\mathcal{I}_{ij}|x_i, x_j) 
-\prod_{i\in \mathcal{K}_k} \prod_{l \in \mathcal{C}_i} p(z_{il}|x_i)
-\end{equation}
+\begin{subequations}
+	\begin{align}
+	p(\mathcal{X}_k|\mathcal{Z}_k) \varpropto p(\mathcal{X}_0) p(\mathcal{Z}_k | \mathcal{X}_k)
+	&=  p(\mathcal{X}_0) \prod_{(i,j)\in \mathcal{K}_k} p(\mathcal{C}_i, \mathcal{I}_{ij}|\mathcal{X}_k)\\
+	&=  p(\mathcal{X}_0) \prod_{(i,j)\in \mathcal{K}_k} p(\mathcal{I}_{ij}|x_i, x_j) 
+	\prod_{i\in \mathcal{K}_k} \prod_{l \in \mathcal{C}_i} p(z_{il}|x_i)
+	\end{align}
+\end{subequations}
 
 finally the map estimate:
 \begin{equation}
@@ -391,8 +395,8 @@ p(t+\Delta t) = p(t) + v(t)\Delta t + + \frac{1}{2}g\Delta t^2
 	\begin{align}
 	\Delta R_{ij} & \doteq R_i^T R_j = \prod_{k=i}^{j-1} Exp((\tilde{\omega} - b^g_k - \eta^{gd}_k) \Delta t) \\
 	\Delta v_{ij} &\doteq R_i^T(v_j - v_i -g \Delta t_{ij}) = \Sigma_{k=i}^{j-1} \Delta R_{ik}(\tilde{a}_k - b_k^a -\eta_k^{ad}) \Delta t\\
-	\Delta p_{ij} &\doteq R_i^T (p_j - p_i - v_i\Delta t_{ij} - \frac{1}{2} \Sigma_{k=i}^{j-1}g\Delta t^2)= 
-	\Sigma_{k=i}^{j-1}[\Delta v_{ik}\Delta t + \frac{1}{2}\Delta R_{ik}(\tilde{a}_k - b_k^a -\eta_k^{ad}) \Delta t^2]
+	\Delta p_{ij} &\doteq R_i^T (p_j - p_i - v_i\Delta t_{ij} - \frac{1}{2} \Sigma_{k=i}^{j-1}g\Delta t^2)\\
+	&= \Sigma_{k=i}^{j-1}[\Delta v_{ik}\Delta t + \frac{1}{2}\Delta R_{ik}(\tilde{a}_k - b_k^a -\eta_k^{ad}) \Delta t^2]
 	\end{align}
 \end{subequations}
 
@@ -460,18 +464,6 @@ factor graph of bias model.
 ||r_{b_{ij}} ||^2 \doteq ||b_j^g - b_i^g||_{\Sigma^{bgd}}^2 + ||b_j^a - b_i^a||_{\Sigma^{bad}}^2
 \end{equation}
 
-\subsection{Linearizing expression for nonlinear optimization}
-\paragraph{linearizing rotation matrix}
-\paragraph{transformation matrix}
-\paragraph{linearizing homogeneous points}
-\paragraph{examples on stereo camera}
-
-\section{Problems still working on}
-\begin{itemize}
-	\item right jacobian and left jacobian
-	\item 
-\end{itemize}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 流程与实现
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -493,11 +485,31 @@ For more info, see \href{http://www.cnblogs.com/youzx/p/6291327.html?utm_source=
 \begin{equation}
 \dot{b}_g(t) = w_{bg}, \quad \dot{b}_a(t) = -\frac{1}{\tau} b_a + w_{ba}
 \end{equation}
+
+
 \subsection{IMU的工作原理与机制}
+\href{https://github.com/ethz-asl/kalibr}{IMU calibration toolbox}
+\href{https://groups.google.com/forum/#!topic/kalibr-users/m17VpekSHtg}{kalibr google group}
+\href{https://www.dfrobot.com/blog-206.html}{a guide to using IMU}
+\href{http://www.jianshu.com/p/69dd18638b8e}{中文版 a guide to using IMU}
+\href{http://www.cnblogs.com/youzx/p/6291327.html?utm_source=itdadao&utm_medium=referral}{IMU Noise Model}
+
 \subsection{gtsam 与isam}
 \subsection{matrix calculus}
+\href{https://en.wikipedia.org/wiki/Matrix_calculus}{matrix calculus from wiki}
+\subsection{manifold and linearization}
+\includepdf[pages={23-52}]{pdfs/furgale_phd11.pdf}
+
+\section{reference}
+http://blog.csdn.net/mulinb/article/details/53421864
 
 \end{document}
+
+%\subsection{Linearizing expression for nonlinear optimization}
+%\paragraph{linearizing rotation matrix}
+%\paragraph{transformation matrix}
+%\paragraph{linearizing homogeneous points}
+%\paragraph{examples on stereo camera}
 
 
 %% 提纲
