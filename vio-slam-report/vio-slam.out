@@ -1,0 +1,29 @@
+\BOOKMARK [1][-]{section.1}{abstract}{}% 1
+\BOOKMARK [1][-]{section.2}{short\040intro}{}% 2
+\BOOKMARK [1][-]{section.3}{okvis\040and\040vi-orb}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{vi-orb}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{okvis}{section.3}% 5
+\BOOKMARK [3][-]{subsubsection.3.2.1}{okvis\040graph}{subsection.3.2}% 6
+\BOOKMARK [3][-]{subsubsection.3.2.2}{initial\040state\040for\040marginalization}{subsection.3.2}% 7
+\BOOKMARK [3][-]{subsubsection.3.2.3}{marginalization\040non\040key\040frame}{subsection.3.2}% 8
+\BOOKMARK [3][-]{subsubsection.3.2.4}{marginalization\040key\040frame}{subsection.3.2}% 9
+\BOOKMARK [1][-]{section.4}{visual inertial slam 中的数学模型}{}% 10
+\BOOKMARK [2][-]{subsection.4.1}{Notations}{section.4}% 11
+\BOOKMARK [2][-]{subsection.4.2}{Preliminaries}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.3}{MAP}{section.4}% 13
+\BOOKMARK [2][-]{subsection.4.4}{IMU\040Model\040and\040Motion\040Integration}{section.4}% 14
+\BOOKMARK [3][-]{subsubsection.4.4.1}{IMU\040Model}{subsection.4.4}% 15
+\BOOKMARK [3][-]{subsubsection.4.4.2}{Kinematic\040Model}{subsection.4.4}% 16
+\BOOKMARK [2][-]{subsection.4.5}{IMU\040pre-integration}{section.4}% 17
+\BOOKMARK [3][-]{subsubsection.4.5.1}{Preintegrated\040IMU\040Measurements}{subsection.4.5}% 18
+\BOOKMARK [3][-]{subsubsection.4.5.2}{Noise\040Propagation}{subsection.4.5}% 19
+\BOOKMARK [3][-]{subsubsection.4.5.3}{Incorporating\040Bias\040Updates,\040given\040a\040bias\040update:\040b\040\040+\040b}{subsection.4.5}% 20
+\BOOKMARK [3][-]{subsubsection.4.5.4}{Bias\040Model}{subsection.4.5}% 21
+\BOOKMARK [2][-]{subsection.4.6}{Linearizing\040expression\040for\040nonlinear\040optimization}{section.4}% 22
+\BOOKMARK [1][-]{section.5}{Problems\040still\040working\040on}{}% 23
+\BOOKMARK [1][-]{section.6}{supplementaries}{}% 24
+\BOOKMARK [2][-]{subsection.6.1}{高斯噪声与随机游走}{section.6}% 25
+\BOOKMARK [3][-]{subsubsection.6.1.1}{Bias\040Model}{subsection.6.1}% 26
+\BOOKMARK [2][-]{subsection.6.2}{IMU的工作原理与机制}{section.6}% 27
+\BOOKMARK [2][-]{subsection.6.3}{gtsam 与isam}{section.6}% 28
+\BOOKMARK [2][-]{subsection.6.4}{matrix\040calculus}{section.6}% 29

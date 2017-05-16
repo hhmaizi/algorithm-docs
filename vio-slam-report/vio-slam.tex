@@ -87,6 +87,17 @@
 %% 摘要
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{abstract}
+本文将简单的介绍下visual inertial slam 的概况和使用到得算法。算法主要涉及到IMU的预积分理论和流形的理论。使用camera + IMU的方案来做SLAM/Odometry，一般被称作Visual-Inertial Odometry (VIO)或者Visual-Inertial Navigation System (VINS)，其实只有odometry还不能说是一个slam系统。按照David Scaramuzza的分类方法，首先分成filter-based 和 optimization based 的两大类。Stefan Leutenegger则则把visual inertial slam 分成tightly-coupled 和loosely-coupled，另外他还给了另外一分类方法"batch optimization and recursive filtering"。个人的理解就是按照是否将IMU数据加入到优化框架中为原则进行分类。
+\paragraph{state of the art visual inertial slam systems}
+\begin{itemize}
+	\item manifold preintegration.%(含代码实现)	svo for front end https://github.com/uzh-rpg/rpg_svo
+	\item keyframe-based visual-inertial slam using nonlinear opt。%(每次状态更新需要对IMU重新积分)
+	\item visual-inertial monocular slam with map reuse.%(无代码，基于预积分理论实现)
+	\item A multi-state constraint Kalman filter for vision-aided inertial navigation.%(有其他人的代码实现)大神Mourikis
+	\item Direct Visual Inertial Odometry with stereo camera(IMU+LSD-SLAM).%大神Jakob Engel(LSD-SLAM的作者，目前在Oculus Research，还有一个direct sparse odometry项目已开源)
+	\item Robust Visual Inertial Odometry(有代码).
+	\item Vision Based Navigation for Micro Helicopters (有代码).
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,32 +109,112 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{short intro}
-使用camera + IMU的方案来做SLAM/Odometry，一般被称作Visual-Inertial Odometry (VIO)或者Visual-Inertial Navigation System (VINS)。按照David Scaramuzza的分类方法，首先分成filter-based 和 optimization based 的两大类。进一步按照是否把图像特征信息加入状态向量来进行分类，可以分为loosely-couply 和tightly-coupled。几个经典的算法包括：
-\paragraph{filter based}
-\begin{description}
-	\item[msckf] msckf没有作者本人的源代码，但是有别人的实现.
-	\item[rovio] Robust Visual Inertial Odometry(有代码).
-	\item[ssf and msf] Vision Based Navigation for Micro Helicopters (有代码).
-\end{description}
+
+loosely-coupled systems independently estimate the pose by a vision only algorithm and fuse IMU measurements only in a separate estimation step, limiting computational complexity. Tightly-coupled approaches
+in contrast include both the measurements from the IMU and the camera into a common problem where all states are jointly estimated, thus considering all correlations amongst them. the later appraoch promize high accuracy, leaving aside computation demands.
+\paragraph{loosely-coupled systems}
+\begin{itemize}
+	\item large-scale visual odometry for rough terrain.
+	\item factor graph based incremental smoothing in inertialo navigation systems.
+	\item fast 3d pose estimation with out-of-sequence measurements.
+	\item real-time onboard visual-inertial state estimation and self-calibration of mavs in unknown enviroments.
+\end{itemize}
+\paragraph{tightly-coupled systems}
+\begin{itemize}
+	\item[okvis] combines visual and inertial terms in a fully probabilistic manner.At the system level, we developed both the hardware and
+	the algorithms for accurate real-time SLAM, including robust keypoint matching, bootstrapping and outlier rejection using
+	inertial cues.
+	\item[viorb] visual-inertial monocular slam with map reuse.%(无代码，基于预积分理论实现)
+	\item[msckf] A multi-state constraint Kalman filter for vision-aided inertial navigation.%(有其他人的代码实现)大神Mourikis
+\end{itemize}
+
+\paragraph{filtering based}
+\begin{itemize}
+	\item robust visual inertial odometry using a direct ekf-based approach.
+	\item robust direct visual inertial odometry via entropy-based relative pose estimation.
+	\item high-precision consistent ekf-based visual-inertial odometry.
+	\item semi-direct ekf-based monocular visual-inertial odometry.
+\end{itemize}
 
 \paragraph{optimization based}
-\begin{description}
-	\item[loosely coupled] "Inertial aided dense and semi-dense methods for robust direct visual odometry" 
-	\item[tightly coupled okvis] "OKVIS: Open Keyframe-based Visual-Inertial SLAM."
-	\item[tightly coupled orbslam] "Visual-Inertial Monocular SLAM with Map Reuse."
-\end{description}
+\begin{itemize}
+	\item okvis
+	\item IMU preintegration on manifold for efficient visual-inertial map estimation.
+	\item visual-inertial navigation, mapping and localization: a scalable real-time approach.
+%	\item 
+\end{itemize}
 
-\subsection{main procedure}
-流程与实现
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% okvis and visual inertial orbslam both stereo camera
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{okvis and vi-orb}
+\subsection{vi-orb}
+个人感觉正如其论文题目"visual-inertial monocular slam with map reuse", visual inertial orbslam的靓点应该在map reuse部分, 在IMU图优化方面只是借鉴了预积分和okvis的算法。visual inertial orb slam 的优化流程：
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.2\linewidth]{images/vi-orb-optimization}
+	\caption{visual inertial orbslam}
+	\label{fig:vi-orb-optimization}
+\end{figure}
+
+\subsection{okvis}
+这个算法基本上可以说是imu加入到优化框架中较早的"state of the art"算法，而且开源。
+\subsubsection{okvis graph}
+okvis 的图优化模型：
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\linewidth]{images/okvis-vislam-state-graph}
+	\caption{okvis state graph}
+	\label{fig:okvis-vislam-state-graph}
+\end{figure}
+
+\subsubsection{initial state for marginalization}
+%\begin{figure}[h!]
+%	\centering
+%	\includegraphics[width=0.7\linewidth]{images/okvis-marginalization-initial}
+%	\caption{}
+%	\label{fig:okvis-marginalization-initial}
+%\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{images/okvis-marginalization-initial}
+	\caption{initial state for marginalization}
+	\label{fig:okvis-marginalization-initial}
+\end{figure}
+
+\subsubsection{marginalization non key frame}
+%\begin{figure}[h!]
+%	\centering
+%	\includegraphics[width=0.7\linewidth]{images/okvis-marginalization-nonkeyframe}
+%	\caption{}
+%	\label{fig:okvis-marginalization-nonkeyframe}
+%\end{figure}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{images/okvis-marginalization-nonkeyframe}
+	\caption{non-key-frame marginalization}
+	\label{fig:okvis-marginalization-nonkeyframe}
+\end{figure}
+
+\subsubsection{marginalization key frame}
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{images/okvis-marginalization-keyframe}
+	\caption{marginalization key-frame}
+	\label{fig:okvis-marginalization-keyframe}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% visual inertial slam 中的数学模型
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{visual inertial slam 中的数学模型}
 \subsection{Notations}
+this is todo work.
 \subsection{Preliminaries}
 \paragraph{Rieman manifold}
-
 The skew symmetric matrices:
 \begin{equation}
 \mathbf{\omega}^\wedge =\begin{bmatrix}
@@ -237,8 +328,6 @@ finally the map estimate:
 argmin_{\mathcal{X}_k} ||r_0||_{\Sigma_0}^2 + \Sigma_{(i,j) \in \mathcal{K}_k}||r_{\mathcal{I}_{ij}}||_{\Sigma_{ij}}^2 + ||r_{\mathcal{C}_{il}}||_{\Sigma_\mathcal{C}}^2
 \end{equation}
 
-
-
 \subsection{IMU Model and Motion Integration}
 
 \subsubsection{IMU Model}
@@ -344,11 +433,17 @@ p(t+\Delta t) = p(t) + v(t)\Delta t + + \frac{1}{2}g\Delta t^2
 \end{subequations}
 
 \subsubsection{Bias Model}
-Bias are slowly time-varying quantities, Hence model them with a "Browian Motion".
+\paragraph{}Bias are slowly time-varying quantities, Hence model them with a "Browian Motion".
 For more info, see \href{http://www.cnblogs.com/youzx/p/6291327.html?utm_source=itdadao&utm_medium=referral}{IMU Model}
 \begin{equation}
 \dot{b}^g(t) = \eta^{bg}, \quad \dot{b}^a(t) = \eta{ba}
 \end{equation}
+
+\paragraph{okvis} uses a different bias model for acc(bounded random walk).
+\begin{equation}
+\dot{b}_g(t) = w_{bg}, \quad \dot{b}_a(t) = -\frac{1}{\tau} b_a + w_{ba}
+\end{equation}
+
 
 the discrete form.
 \begin{equation}
@@ -370,18 +465,6 @@ factor graph of bias model.
 \paragraph{transformation matrix}
 \paragraph{linearizing homogeneous points}
 \paragraph{examples on stereo camera}
-\subsection{}
-\subsection{}
-\subsection{}
-\subsection{}
-
-\section{mathematical principles behind the model}
-\subsubsection{Preliminaries}
-\subsubsection{Notions of Riemannian geometry}
-\subsubsection{Uncertainty descriptions in SO(3)}
-\subsubsection{Gauss-Newton Method on Manifold}
-
-\subsection{Maximum a Posteriori visual-inertial state estimation}
 
 \section{Problems still working on}
 \begin{itemize}
@@ -399,9 +482,32 @@ factor graph of bias model.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{supplementaries}
 \subsection{高斯噪声与随机游走}
+\subsubsection{Bias Model}
+\paragraph{}Bias are slowly time-varying quantities, Hence model them with a "Browian Motion".
+For more info, see \href{http://www.cnblogs.com/youzx/p/6291327.html?utm_source=itdadao&utm_medium=referral}{IMU Model}
+\begin{equation}
+\dot{b}^g(t) = \eta^{bg}, \quad \dot{b}^a(t) = \eta{ba}
+\end{equation}
+
+\paragraph{okvis} uses a different bias model for acc(bounded random walk).
+\begin{equation}
+\dot{b}_g(t) = w_{bg}, \quad \dot{b}_a(t) = -\frac{1}{\tau} b_a + w_{ba}
+\end{equation}
 \subsection{IMU的工作原理与机制}
 \subsection{gtsam 与isam}
 \subsection{matrix calculus}
+
+\end{document}
+
+
+%% 提纲
+%\section{mathematical principles behind the model}
+%\subsubsection{Preliminaries}
+%\subsubsection{Notions of Riemannian geometry}
+%\subsubsection{Uncertainty descriptions in SO(3)}
+%\subsubsection{Gauss-Newton Method on Manifold}
+%
+%\subsection{Maximum a Posteriori visual-inertial state estimation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 参考文献
@@ -433,4 +539,3 @@ factor graph of bias model.
 %    \begin{center}
 %		\includegraphics[width=1\textwidth]{images/GN.png}
 %	\end{center}
-\end{document}
